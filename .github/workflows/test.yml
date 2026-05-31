@@ -1,0 +1,20 @@
+name: Test
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: |
+          chmod +x gcd.sh
+          chmod +x tests/gcd-test.sh
+
+      - name: Run tests
+        run: ./tests/gcd-test.sh
