@@ -75,9 +75,50 @@ run_failure_tests() {
   test_failure 10 ""
 }
 
+test_error_message() {
+  expected="$1"
+  shift
+
+  actual=$("$SCRIPT" "$@" 2>&1 >/dev/null)
+  status=$?
+
+  if [ "$status" -ne 0 ] && echo "$actual" | grep -Fq "$expected"; then
+    printf 'PASS: error message: %s\n' "$*"
+    record_pass
+  else
+    printf 'FAIL: error message: %s\n' "$*"
+    printf '  expected message: %s\n' "$expected"
+    printf '  actual output:\n%s\n' "$actual"
+    printf '  status: %s\n' "$status"
+    record_fail
+  fi
+}
+
+run_error_message_tests() {
+  test_error_message "Wrong number of arguments." 
+  test_error_message "Wrong number of arguments." 10
+  test_error_message "Wrong number of arguments." 10 20 30
+
+  test_error_message "Arguments must be positive integers." abc 10
+  test_error_message "Arguments must be positive integers." 10 abc
+
+  test_error_message "Arguments must be positive integers." 0 10
+  test_error_message "Arguments must be positive integers." 10 0
+
+  test_error_message "Arguments must be positive integers." -1 10
+  test_error_message "Arguments must be positive integers." 10 -1
+
+  test_error_message "Arguments must be positive integers." 1.5 10
+  test_error_message "Arguments must be positive integers." 10 2.5
+
+  test_error_message "Arguments must be positive integers." "" 10
+  test_error_message "Arguments must be positive integers." 10 ""
+}
+
 main() {
   run_success_tests
   run_failure_tests
+  run_error_message_tests
 
   printf '\n'
   printf 'PASS=%s FAIL=%s\n' "$pass" "$fail"
